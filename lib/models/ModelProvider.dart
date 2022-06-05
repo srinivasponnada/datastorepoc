@@ -32,6 +32,9 @@ class ModelProvider implements ModelProviderInterface {
   static final ModelProvider _instance = ModelProvider();
 
   static ModelProvider get instance => _instance;
+
+  @override
+  List<ModelSchema> customTypeSchemas = [];
   
   ModelType getModelTypeByModelName(String modelName) {
     switch(modelName) {

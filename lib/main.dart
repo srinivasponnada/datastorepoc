@@ -1,115 +1,183 @@
+import 'dart:async';
+
+import 'package:datastorepoc/models/ModelProvider.dart';
 import 'package:flutter/material.dart';
 
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_datastore/amplify_datastore.dart';
+
+import 'amplifyconfiguration.dart';
+import 'models/ModelProvider.dart';
+
 void main() {
+  print('@ main');
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  // This widget is the root of application.
   @override
   Widget build(BuildContext context) {
+
+    print('@ MyApp.Widget');
+
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      theme: ThemeData(primarySwatch: Colors.purple),
+        darkTheme: ThemeData.dark().copyWith(
+          colorScheme: ThemeData(
+            primarySwatch: Colors.purple,
+          ).colorScheme,
+        ),
+      home:
+        Scaffold(
+            body: Center(child: ServiceRequestListView()),
+        )
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+class ServiceRequestListView extends StatefulWidget
+{
+  CustomServiceRequestListView createState() => CustomServiceRequestListView();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class CustomServiceRequestListView extends State
+{
+  List<ServiceRequest> _srList = [];
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+// subscription of Todo QuerySnapshots - to be initialized at runtime
+  late StreamSubscription<QuerySnapshot<ServiceRequest>> _subscription;
+
+  @override
+  void initState() {
+
+    print('@ CustomServiceRequestListView.initState');
+
+    _initializeApp();
+    super.initState();
+  }
+
+  Future<void> _initializeApp() async {
+
+    print('@ CustomServiceRequestListView._initializeApp');
+
+    await _configureAmplify();
+
+    _subscription = Amplify.DataStore.observeQuery(ServiceRequest.classType).listen((QuerySnapshot<ServiceRequest> snapshot) {
+      setState(() {
+        _srList = snapshot.items;
+        print('@ _subscription : ${_srList.length}');
+      });
     });
+  }
+
+  Future<void> _configureAmplify() async {
+
+    print('@ CustomServiceRequestListView._configureAmplify');
+
+    ServiceRequest sr1 = new ServiceRequest(customerFirst: 'Mervin', customerLast: 'Huges');
+    // Add the following lines to your app initialization to add the DataStore plugin
+
+    AmplifyDataStore datastorePlugin = AmplifyDataStore(modelProvider: ModelProvider.instance);
+    Amplify.addPlugin(datastorePlugin);
+
+    try {
+      await Amplify.configure(amplifyconfig);
+    }
+    on AmplifyAlreadyConfiguredException {
+      print("Tried to reconfigure Amplify; this can occur when your app restarts on Android.");
+    }
+
+    await Amplify.DataStore.save(sr1);
+
+    try {
+      _srList = await Amplify.DataStore.query(ServiceRequest.classType);
+      print('@ _configureAmplify : ${_srList.length}');
+    }
+    on DataStoreException catch (e) {
+      print('Query failed: $e');
+    }
+
+    print('@ _configureAmplify : ${_srList.length}');
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+
+    print('CustomServiceRequestListView.build : Building UI : ${_srList.length}');
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('JSON ListView in Flutter'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: ServiceRequestList(serviceRequest: _srList)
+      );
+  }
+}
+
+class ServiceRequestList extends StatelessWidget {
+  final List<ServiceRequest> serviceRequest;
+
+  ServiceRequestList({required this.serviceRequest});
+
+  @override
+  Widget build(BuildContext context) {
+
+    print('ServiceRequestList.Widget : Building ListView : ${serviceRequest.length}');
+
+    return serviceRequest.length >= 1
+        ? ListView(
+        padding: EdgeInsets.all(8),
+        children: serviceRequest.map((serviceRequest) => ServiceRequestItem(serviceRequest: serviceRequest)).toList())
+        : Center(child: Text('Tap button below to add a todo!'));
+  }
+}
+
+class ServiceRequestItem extends StatelessWidget {
+  final double iconSize = 24.0;
+  final ServiceRequest serviceRequest;
+
+  ServiceRequestItem({required this.serviceRequest});
+
+  @override
+  Widget build(BuildContext context) {
+
+    print('ServiceRequestItem.Widget');
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          4.0,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      elevation: 4.0,
+      child: ListTile(
+        leading: const CircleAvatar(
+          backgroundImage:
+          NetworkImage('https://learncodeonline.in/mascot.png'),
+        ),
+        title: Text(
+          serviceRequest.customerLast ?? 'No description',
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.0,
+          ),
+        ),
+        subtitle: Text(
+          serviceRequest.customerLast ?? 'No description',
+          style: const TextStyle(
+            color: Colors.blueAccent,
+            fontWeight: FontWeight.normal,
+            fontSize: 16.0,
+          ),
+        ),
+      ),
     );
   }
 }
