@@ -19,4 +19,9 @@ type ServiceRequest @model {
   quotedRate: Float
   clientName: String
   customerMobilePhone: AWSPhone
+  requestStatus: Status
+}
+enum Status {
+  DRAFT
+  PUBLISHED
 }

@@ -19,7 +19,8 @@
 
 // ignore_for_file: public_member_api_docs, annotate_overrides, dead_code, dead_codepublic_member_api_docs, depend_on_referenced_packages, file_names, library_private_types_in_public_api, no_leading_underscores_for_library_prefixes, no_leading_underscores_for_local_identifiers, non_constant_identifier_names, null_check_on_nullable_type_parameter, prefer_adjacent_string_concatenation, prefer_const_constructors, prefer_if_null_operators, prefer_interpolation_to_compose_strings, slash_for_doc_comments, sort_child_properties_last, unnecessary_const, unnecessary_constructor_name, unnecessary_late, unnecessary_new, unnecessary_null_aware_assignments, unnecessary_nullable_for_final_variable_declarations, unnecessary_string_interpolations, use_build_context_synchronously
 
-import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
+import 'ModelProvider.dart';
+import 'package:amplify_core/amplify_core.dart';
 import 'package:flutter/foundation.dart';
 
 
@@ -43,6 +44,9 @@ class ServiceRequest extends Model {
   final double? _quotedRate;
   final String? _clientName;
   final String? _customerMobilePhone;
+  final Status? _requestStatus;
+  final TemporalDateTime? _createdAt;
+  final TemporalDateTime? _updatedAt;
 
   @override
   getInstanceType() => classType;
@@ -112,9 +116,21 @@ class ServiceRequest extends Model {
     return _customerMobilePhone;
   }
   
-  const ServiceRequest._internal({required this.id, serviceRequestID, Summary, Instructions, customerFirst, customerLast, propertyAddress, propertyCity, propertyState, propertyZip, appointmentStartLocalTime, appointmentEndLocalTime, dispatchedBy, quotedRate, clientName, customerMobilePhone}): _serviceRequestID = serviceRequestID, _Summary = Summary, _Instructions = Instructions, _customerFirst = customerFirst, _customerLast = customerLast, _propertyAddress = propertyAddress, _propertyCity = propertyCity, _propertyState = propertyState, _propertyZip = propertyZip, _appointmentStartLocalTime = appointmentStartLocalTime, _appointmentEndLocalTime = appointmentEndLocalTime, _dispatchedBy = dispatchedBy, _quotedRate = quotedRate, _clientName = clientName, _customerMobilePhone = customerMobilePhone;
+  Status? get requestStatus {
+    return _requestStatus;
+  }
   
-  factory ServiceRequest({String? id, String? serviceRequestID, String? Summary, String? Instructions, String? customerFirst, String? customerLast, String? propertyAddress, String? propertyCity, String? propertyState, String? propertyZip, TemporalDateTime? appointmentStartLocalTime, TemporalDateTime? appointmentEndLocalTime, String? dispatchedBy, double? quotedRate, String? clientName, String? customerMobilePhone}) {
+  TemporalDateTime? get createdAt {
+    return _createdAt;
+  }
+  
+  TemporalDateTime? get updatedAt {
+    return _updatedAt;
+  }
+  
+  const ServiceRequest._internal({required this.id, serviceRequestID, Summary, Instructions, customerFirst, customerLast, propertyAddress, propertyCity, propertyState, propertyZip, appointmentStartLocalTime, appointmentEndLocalTime, dispatchedBy, quotedRate, clientName, customerMobilePhone, requestStatus, createdAt, updatedAt}): _serviceRequestID = serviceRequestID, _Summary = Summary, _Instructions = Instructions, _customerFirst = customerFirst, _customerLast = customerLast, _propertyAddress = propertyAddress, _propertyCity = propertyCity, _propertyState = propertyState, _propertyZip = propertyZip, _appointmentStartLocalTime = appointmentStartLocalTime, _appointmentEndLocalTime = appointmentEndLocalTime, _dispatchedBy = dispatchedBy, _quotedRate = quotedRate, _clientName = clientName, _customerMobilePhone = customerMobilePhone, _requestStatus = requestStatus, _createdAt = createdAt, _updatedAt = updatedAt;
+  
+  factory ServiceRequest({String? id, String? serviceRequestID, String? Summary, String? Instructions, String? customerFirst, String? customerLast, String? propertyAddress, String? propertyCity, String? propertyState, String? propertyZip, TemporalDateTime? appointmentStartLocalTime, TemporalDateTime? appointmentEndLocalTime, String? dispatchedBy, double? quotedRate, String? clientName, String? customerMobilePhone, Status? requestStatus}) {
     return ServiceRequest._internal(
       id: id == null ? UUID.getUUID() : id,
       serviceRequestID: serviceRequestID,
@@ -131,7 +147,8 @@ class ServiceRequest extends Model {
       dispatchedBy: dispatchedBy,
       quotedRate: quotedRate,
       clientName: clientName,
-      customerMobilePhone: customerMobilePhone);
+      customerMobilePhone: customerMobilePhone,
+      requestStatus: requestStatus);
   }
   
   bool equals(Object other) {
@@ -157,7 +174,8 @@ class ServiceRequest extends Model {
       _dispatchedBy == other._dispatchedBy &&
       _quotedRate == other._quotedRate &&
       _clientName == other._clientName &&
-      _customerMobilePhone == other._customerMobilePhone;
+      _customerMobilePhone == other._customerMobilePhone &&
+      _requestStatus == other._requestStatus;
   }
   
   @override
@@ -183,14 +201,17 @@ class ServiceRequest extends Model {
     buffer.write("dispatchedBy=" + "$_dispatchedBy" + ", ");
     buffer.write("quotedRate=" + (_quotedRate != null ? _quotedRate!.toString() : "null") + ", ");
     buffer.write("clientName=" + "$_clientName" + ", ");
-    buffer.write("customerMobilePhone=" + "$_customerMobilePhone");
+    buffer.write("customerMobilePhone=" + "$_customerMobilePhone" + ", ");
+    buffer.write("requestStatus=" + (_requestStatus != null ? enumToString(_requestStatus)! : "null") + ", ");
+    buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
+    buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
     
     return buffer.toString();
   }
   
-  ServiceRequest copyWith({String? id, String? serviceRequestID, String? Summary, String? Instructions, String? customerFirst, String? customerLast, String? propertyAddress, String? propertyCity, String? propertyState, String? propertyZip, TemporalDateTime? appointmentStartLocalTime, TemporalDateTime? appointmentEndLocalTime, String? dispatchedBy, double? quotedRate, String? clientName, String? customerMobilePhone}) {
-    return ServiceRequest(
+  ServiceRequest copyWith({String? id, String? serviceRequestID, String? Summary, String? Instructions, String? customerFirst, String? customerLast, String? propertyAddress, String? propertyCity, String? propertyState, String? propertyZip, TemporalDateTime? appointmentStartLocalTime, TemporalDateTime? appointmentEndLocalTime, String? dispatchedBy, double? quotedRate, String? clientName, String? customerMobilePhone, Status? requestStatus}) {
+    return ServiceRequest._internal(
       id: id ?? this.id,
       serviceRequestID: serviceRequestID ?? this.serviceRequestID,
       Summary: Summary ?? this.Summary,
@@ -206,7 +227,8 @@ class ServiceRequest extends Model {
       dispatchedBy: dispatchedBy ?? this.dispatchedBy,
       quotedRate: quotedRate ?? this.quotedRate,
       clientName: clientName ?? this.clientName,
-      customerMobilePhone: customerMobilePhone ?? this.customerMobilePhone);
+      customerMobilePhone: customerMobilePhone ?? this.customerMobilePhone,
+      requestStatus: requestStatus ?? this.requestStatus);
   }
   
   ServiceRequest.fromJson(Map<String, dynamic> json)  
@@ -225,10 +247,13 @@ class ServiceRequest extends Model {
       _dispatchedBy = json['dispatchedBy'],
       _quotedRate = (json['quotedRate'] as num?)?.toDouble(),
       _clientName = json['clientName'],
-      _customerMobilePhone = json['customerMobilePhone'];
+      _customerMobilePhone = json['customerMobilePhone'],
+      _requestStatus = enumFromString<Status>(json['requestStatus'], Status.values),
+      _createdAt = json['createdAt'] != null ? TemporalDateTime.fromString(json['createdAt']) : null,
+      _updatedAt = json['updatedAt'] != null ? TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'serviceRequestID': _serviceRequestID, 'Summary': _Summary, 'Instructions': _Instructions, 'customerFirst': _customerFirst, 'customerLast': _customerLast, 'propertyAddress': _propertyAddress, 'propertyCity': _propertyCity, 'propertyState': _propertyState, 'propertyZip': _propertyZip, 'appointmentStartLocalTime': _appointmentStartLocalTime?.format(), 'appointmentEndLocalTime': _appointmentEndLocalTime?.format(), 'dispatchedBy': _dispatchedBy, 'quotedRate': _quotedRate, 'clientName': _clientName, 'customerMobilePhone': _customerMobilePhone
+    'id': id, 'serviceRequestID': _serviceRequestID, 'Summary': _Summary, 'Instructions': _Instructions, 'customerFirst': _customerFirst, 'customerLast': _customerLast, 'propertyAddress': _propertyAddress, 'propertyCity': _propertyCity, 'propertyState': _propertyState, 'propertyZip': _propertyZip, 'appointmentStartLocalTime': _appointmentStartLocalTime?.format(), 'appointmentEndLocalTime': _appointmentEndLocalTime?.format(), 'dispatchedBy': _dispatchedBy, 'quotedRate': _quotedRate, 'clientName': _clientName, 'customerMobilePhone': _customerMobilePhone, 'requestStatus': enumToString(_requestStatus), 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
   static final QueryField ID = QueryField(fieldName: "serviceRequest.id");
@@ -247,6 +272,7 @@ class ServiceRequest extends Model {
   static final QueryField QUOTEDRATE = QueryField(fieldName: "quotedRate");
   static final QueryField CLIENTNAME = QueryField(fieldName: "clientName");
   static final QueryField CUSTOMERMOBILEPHONE = QueryField(fieldName: "customerMobilePhone");
+  static final QueryField REQUESTSTATUS = QueryField(fieldName: "requestStatus");
   static var schema = Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "ServiceRequest";
     modelSchemaDefinition.pluralName = "ServiceRequests";
@@ -341,6 +367,26 @@ class ServiceRequest extends Model {
       key: ServiceRequest.CUSTOMERMOBILEPHONE,
       isRequired: false,
       ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: ServiceRequest.REQUESTSTATUS,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.enumeration)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'createdAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'updatedAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
     ));
   });
 }

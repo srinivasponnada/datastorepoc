@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_datastore/amplify_datastore.dart';
 
+import 'ServiceRequestDetails.dart';
 import 'amplifyconfiguration.dart';
 import 'models/ModelProvider.dart';
 
@@ -157,10 +158,18 @@ class ServiceRequestItem extends StatelessWidget {
       ),
       elevation: 4.0,
       child: ListTile(
-        leading: const CircleAvatar(
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+        /*leading: const CircleAvatar(
           backgroundImage:
           NetworkImage('https://learncodeonline.in/mascot.png'),
-        ),
+        ),*/
+        /*leading: Container(
+          padding: EdgeInsets.only(right: 12.0),
+          decoration: new BoxDecoration(
+              border: new Border(
+                  right: new BorderSide(width: 1.0, color: Colors.white24))),
+          child: Icon(Icons.autorenew, color: Colors.white),
+        ),*/
         title: Text(
           serviceRequest.customerLast ?? 'No description',
           style: const TextStyle(
@@ -177,7 +186,57 @@ class ServiceRequestItem extends StatelessWidget {
             fontSize: 16.0,
           ),
         ),
+          trailing: Icon(Icons.keyboard_arrow_right, color: Colors.blueAccent, size: 30.0),
+          onTap: () {
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ServiceRequestDetails(serviceRequest: serviceRequest)
+                )
+            );
+          }
       ),
     );
   }
 }
+
+class DetailPage extends StatelessWidget {
+
+  final ServiceRequest serviceRequest;
+
+  DetailPage({required this.serviceRequest});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: <Widget>
+        [
+          Container(
+            height: MediaQuery.of(context).size.height * 0.5,
+            padding: EdgeInsets.all(40.0),
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(color: Color.fromRGBO(58, 66, 86, .9)),
+            child: Center(
+              child: Text(serviceRequest.id),
+            ),
+          ),
+          Positioned(
+            left: 8.0,
+            top: 60.0,
+            child: InkWell(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Icon(Icons.arrow_back, color: Colors.blueAccent),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
