@@ -22,6 +22,9 @@ type ServiceRequest @model {
   requestStatus: Status
 }
 enum Status {
-  DRAFT
-  PUBLISHED
+  Accepted
+  Rejected
+  Assigned
+  InProgress
+  Completed
 }
