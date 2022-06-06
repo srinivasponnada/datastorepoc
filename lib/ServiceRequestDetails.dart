@@ -119,7 +119,6 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                     )),
               ),
 
-              // Third Element
               Padding(
                 padding: const EdgeInsets.only(
                     top: 15.0, bottom: 15.0, left: 15.0),
@@ -130,6 +129,21 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
 
                   decoration: const InputDecoration(
                     labelText: 'Details',
+                    // icon: Icon(Icons.details),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    top: 15.0, bottom: 15.0, left: 15.0),
+                child: TextField(
+                  readOnly: true,
+                  cursorColor: Colors.purple,
+                  controller: TextEditingController(text: serviceRequest.requestStatus.toString().split('.').last),
+                  // style: textStyle,
+
+                  decoration: const InputDecoration(
+                    labelText: 'Status',
                     // icon: Icon(Icons.details),
                   ),
                 ),
@@ -152,8 +166,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                             ),
                             onPressed: () {
                               setState(() {
-                                // debugPrint("Save button clicked");
-                                // _save();
+                                rejectServiceRequest(serviceRequest.id);
                               });
                             },
                             style: ButtonStyle(
@@ -181,8 +194,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                             ),
                             onPressed: () {
                               setState(() {
-                                // debugPrint("Save button clicked");
-                                // _save();
+                                acceptServiceRequest(serviceRequest.id);
                               });
                             },
                             style: ButtonStyle(
@@ -216,5 +228,28 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
   void moveToLastScreen() {
     Navigator.pop(context, true);
   }
+
+  Future<void> acceptServiceRequest(String serviceRequestId) async{
+    ServiceRequest updatedServiceRequest = (await Amplify.DataStore.query(ServiceRequest.classType,
+        where: ServiceRequest.ID.eq(serviceRequestId)))[0];
+    ServiceRequest newServiceRequest = updatedServiceRequest.copyWith(
+        id: updatedServiceRequest.id,
+        requestStatus: Status.Accepted);
+
+    await Amplify.DataStore.save(newServiceRequest);
+    Navigator.pop(context, true);
+  }
+
+  Future<void> rejectServiceRequest(String serviceRequestId) async{
+    ServiceRequest updatedServiceRequest = (await Amplify.DataStore.query(ServiceRequest.classType,
+        where: ServiceRequest.ID.eq(serviceRequestId)))[0];
+    ServiceRequest newServiceRequest = updatedServiceRequest.copyWith(
+        id: updatedServiceRequest.id,
+        requestStatus: Status.Rejected);
+
+    await Amplify.DataStore.save(newServiceRequest);
+    Navigator.pop(context, true);
+  }
+
 
 }

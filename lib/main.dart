@@ -10,6 +10,8 @@ import 'ServiceRequestDetails.dart';
 import 'amplifyconfiguration.dart';
 import 'models/ModelProvider.dart';
 
+import 'package:amplify_api/amplify_api.dart';
+
 void main() {
   print('@ main');
   runApp(const MyApp());
@@ -80,11 +82,12 @@ class CustomServiceRequestListView extends State
 
     print('@ CustomServiceRequestListView._configureAmplify');
 
-    ServiceRequest sr1 = new ServiceRequest(customerFirst: 'Mervin', customerLast: 'Huges');
+    //ServiceRequest sr1 = new ServiceRequest(customerFirst: 'Charlie', customerLast: 'Din', requestStatus: Status.Assigned);
     // Add the following lines to your app initialization to add the DataStore plugin
 
     AmplifyDataStore datastorePlugin = AmplifyDataStore(modelProvider: ModelProvider.instance);
     Amplify.addPlugin(datastorePlugin);
+    await Amplify.addPlugin(AmplifyAPI());
 
     try {
       await Amplify.configure(amplifyconfig);
@@ -93,7 +96,7 @@ class CustomServiceRequestListView extends State
       print("Tried to reconfigure Amplify; this can occur when your app restarts on Android.");
     }
 
-    await Amplify.DataStore.save(sr1);
+    //await Amplify.DataStore.save(sr1);
 
     try {
       _srList = await Amplify.DataStore.query(ServiceRequest.classType);
@@ -179,7 +182,7 @@ class ServiceRequestItem extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          serviceRequest.customerLast ?? 'No description',
+          serviceRequest.requestStatus.toString().split('.').last ?? 'No description',
           style: const TextStyle(
             color: Colors.blueAccent,
             fontWeight: FontWeight.normal,
