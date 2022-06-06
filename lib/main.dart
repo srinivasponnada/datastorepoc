@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
 
     print('@ MyApp.Widget');
 
-    return Authenticator(
+    /*return Authenticator(
         child: MaterialApp(
           builder: Authenticator.builder(),
           title: 'Flutter Demo',
@@ -45,9 +45,9 @@ class MyApp extends StatelessWidget {
               body: Center(child: ServiceRequestListView()),
           )
         ),
-    );
+    );*/
 
-    /*return MaterialApp(
+    return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(primarySwatch: Colors.purple),
         darkTheme: ThemeData.dark().copyWith(
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
         Scaffold(
             body: Center(child: ServiceRequestListView()),
         )
-    );*/
+    );
   }
 }
 
