@@ -12,6 +12,10 @@ import 'models/ModelProvider.dart';
 
 import 'package:amplify_api/amplify_api.dart';
 
+import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+
+import 'package:amplify_authenticator/amplify_authenticator.dart';
+
 void main() {
   print('@ main');
   runApp(const MyApp());
@@ -27,7 +31,23 @@ class MyApp extends StatelessWidget {
 
     print('@ MyApp.Widget');
 
-    return MaterialApp(
+    return Authenticator(
+        child: MaterialApp(
+          builder: Authenticator.builder(),
+          title: 'Flutter Demo',
+          theme: ThemeData(primarySwatch: Colors.purple),
+          darkTheme: ThemeData.dark().copyWith(
+            colorScheme: ThemeData(
+              primarySwatch: Colors.purple,
+            ).colorScheme,
+          ),
+          home: Scaffold(
+              body: Center(child: ServiceRequestListView()),
+          )
+        ),
+    );
+
+    /*return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(primarySwatch: Colors.purple),
         darkTheme: ThemeData.dark().copyWith(
@@ -39,7 +59,7 @@ class MyApp extends StatelessWidget {
         Scaffold(
             body: Center(child: ServiceRequestListView()),
         )
-    );
+    );*/
   }
 }
 
@@ -89,6 +109,9 @@ class CustomServiceRequestListView extends State
     Amplify.addPlugin(datastorePlugin);
     await Amplify.addPlugin(AmplifyAPI());
 
+    // Add the following line to add Auth plugin to your app.
+    await Amplify.addPlugin(AmplifyAuthCognito());
+
     try {
       await Amplify.configure(amplifyconfig);
     }
@@ -116,7 +139,7 @@ class CustomServiceRequestListView extends State
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('JSON ListView in Flutter'),
+        title: Text('Service Requests'),
       ),
       body: ServiceRequestList(serviceRequest: _srList)
       );
@@ -182,7 +205,7 @@ class ServiceRequestItem extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          serviceRequest.requestStatus.toString().split('.').last ?? 'No description',
+          serviceRequest.requestStatus.toString().split('.').last,
           style: const TextStyle(
             color: Colors.blueAccent,
             fontWeight: FontWeight.normal,
