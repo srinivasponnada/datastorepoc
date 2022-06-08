@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:datastorepoc/Inspection.dart';
 import 'package:datastorepoc/models/ModelProvider.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,8 @@ import 'package:amplify_datastore/amplify_datastore.dart';
 
 import 'amplifyconfiguration.dart';
 import 'models/ModelProvider.dart';
+
+import 'package:cool_stepper/cool_stepper.dart';
 
 class ServiceRequestDetails extends StatefulWidget {
 
@@ -31,8 +34,8 @@ class ServiceRequestDetails extends StatefulWidget {
 
 class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
 
+  final _formKey = GlobalKey<FormState>();
   ServiceRequest serviceRequest;
-
   _ServiceRequestDetailsState({required this.serviceRequest});
 
   @override
@@ -40,7 +43,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Details of Service Request"),
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.blue,
         leading: IconButton(
           onPressed: () {
             moveToLastScreen();
@@ -53,58 +56,10 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
       ),
       body: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
-          child: /*Column(
-            children: [
-              TextField(
-                  controller: TextEditingController(text: serviceRequest.id),
-                  decoration: InputDecoration(labelText: 'ID'),
-                  readOnly: true
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              TextFormField(
-                  decoration: InputDecoration(labelText: 'Email Address'),
-                  initialValue: serviceRequest.customerFirst
-              ),
-              ElevatedButton(
-                  child: const Text(
-                    'Save',
-                    textScaleFactor: 1.5,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {
-                    setState(() {;
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor:
-                    MaterialStateProperty.all(Colors.purple),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.all(15)),
-                    foregroundColor:
-                    MaterialStateProperty.all<Color>(Colors.purple),
-                    shape: MaterialStateProperty.all<
-                        RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: const BorderSide(color: Colors.purple),
-                      ),
-                    ),
-                  ),
-              ),
-            ],
-          )*/
+          child:
+
           ListView(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(top: 25.0, bottom: 5.0),
-                //dropdown menu
-                /*child: ListTile(
-                  leading: const Icon(Icons.low_priority),
-                ),*/
-              ),
-              // Second Element
               Padding(
                 padding: const EdgeInsets.only(
                     top: 15.0, bottom: 15.0, left: 15.0),
@@ -170,47 +125,24 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                               });
                             },
                             style: ButtonStyle(
-                              backgroundColor:
-                              MaterialStateProperty.all(Colors.purple),
-                              padding: MaterialStateProperty.all<EdgeInsets>(
-                                  const EdgeInsets.all(5)),
-                              foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.purple),
-                              shape: MaterialStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  side: const BorderSide(color: Colors.purple),
-                                ),
-                              ),
+                              backgroundColor: MaterialStateProperty.all(Colors.blue),
+                              padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(5)),
                             ),
                           ),
-                          SizedBox(width: 25),
                           ElevatedButton(
                             child: const Text(
-                              'Accept',
+                              'Start Inspection',
                               textScaleFactor: 1.5,
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () {
                               setState(() {
-                                acceptServiceRequest(serviceRequest.id);
+                                startInspection(serviceRequest);
                               });
                             },
                             style: ButtonStyle(
-                              backgroundColor:
-                              MaterialStateProperty.all(Colors.purple),
-                              padding: MaterialStateProperty.all<EdgeInsets>(
-                                  const EdgeInsets.all(5)),
-                              foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.purple),
-                              shape: MaterialStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  side: const BorderSide(color: Colors.purple),
-                                ),
-                              ),
+                              backgroundColor: MaterialStateProperty.all(Colors.blue),
+                              padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(5)),
                             ),
                           ),
                         ],
@@ -227,6 +159,15 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
 
   void moveToLastScreen() {
     Navigator.pop(context, true);
+  }
+
+  void startInspection(ServiceRequest serviceRequest){
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => Inspection(serviceRequest: serviceRequest)
+        )
+    );
   }
 
   Future<void> acceptServiceRequest(String serviceRequestId) async{

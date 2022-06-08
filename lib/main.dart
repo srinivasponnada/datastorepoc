@@ -7,14 +7,18 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_datastore/amplify_datastore.dart';
 
 import 'ServiceRequestDetails.dart';
+import 'ServiceRequestList.dart';
 import 'amplifyconfiguration.dart';
 import 'models/ModelProvider.dart';
 
 import 'package:amplify_api/amplify_api.dart';
 
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:amplify_authenticator/amplify_authenticator.dart';
+
+import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 
 void main() {
   print('@ main');
@@ -49,11 +53,10 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.purple),
-        darkTheme: ThemeData.dark().copyWith(
-          colorScheme: ThemeData(
-            primarySwatch: Colors.purple,
-          ).colorScheme,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          fontFamily: GoogleFonts.poppins().fontFamily,
         ),
       home:
         Scaffold(
@@ -68,9 +71,10 @@ class ServiceRequestListView extends StatefulWidget
   CustomServiceRequestListView createState() => CustomServiceRequestListView();
 }
 
-class CustomServiceRequestListView extends State
+class CustomServiceRequestListView extends State with SingleTickerProviderStateMixin
 {
   List<ServiceRequest> _srList = [];
+  late final _tabController = TabController(length: 3, vsync: this);
 
 // subscription of Todo QuerySnapshots - to be initialized at runtime
   late StreamSubscription<QuerySnapshot<ServiceRequest>> _subscription;
@@ -90,12 +94,21 @@ class CustomServiceRequestListView extends State
 
     await _configureAmplify();
 
+    QueryPredicate predicate = ServiceRequest.REQUESTSTATUS.eq(Status.Accepted);
+
     _subscription = Amplify.DataStore.observeQuery(ServiceRequest.classType).listen((QuerySnapshot<ServiceRequest> snapshot) {
       setState(() {
         _srList = snapshot.items;
         print('@ _subscription : ${_srList.length}');
       });
     });
+
+    /*Stream<SubscriptionEvent<ServiceRequest>> stream = Amplify.DataStore.observe(ServiceRequest.classType);
+    stream.listen((event) {
+      print('Received event of type ' + event.eventType.toString());
+      print('Received post ' + event.item.toString());
+    });*/
+
   }
 
   Future<void> _configureAmplify() async {
@@ -112,6 +125,9 @@ class CustomServiceRequestListView extends State
     // Add the following line to add Auth plugin to your app.
     await Amplify.addPlugin(AmplifyAuthCognito());
 
+    // Add this line, to include Auth and Storage plugins.
+    await Amplify.addPlugin(AmplifyStorageS3());
+
     try {
       await Amplify.configure(amplifyconfig);
     }
@@ -122,7 +138,9 @@ class CustomServiceRequestListView extends State
     //await Amplify.DataStore.save(sr1);
 
     try {
-      _srList = await Amplify.DataStore.query(ServiceRequest.classType);
+      _srList = await Amplify.DataStore.query(
+          ServiceRequest.classType,
+          where: ServiceRequest.REQUESTSTATUS.eq(Status.Rejected));
       print('@ _configureAmplify : ${_srList.length}');
     }
     on DataStoreException catch (e) {
@@ -137,132 +155,85 @@ class CustomServiceRequestListView extends State
 
     print('CustomServiceRequestListView.build : Building UI : ${_srList.length}');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Service Requests'),
-      ),
-      body: ServiceRequestList(serviceRequest: _srList)
-      );
-  }
-}
-
-class ServiceRequestList extends StatelessWidget {
-  final List<ServiceRequest> serviceRequest;
-
-  ServiceRequestList({required this.serviceRequest});
-
-  @override
-  Widget build(BuildContext context) {
-
-    print('ServiceRequestList.Widget : Building ListView : ${serviceRequest.length}');
-
-    return serviceRequest.length >= 1
-        ? ListView(
-        padding: EdgeInsets.all(8),
-        children: serviceRequest.map((serviceRequest) => ServiceRequestItem(serviceRequest: serviceRequest)).toList())
-        : Center(child: Text('Tap button below to add a todo!'));
-  }
-}
-
-class ServiceRequestItem extends StatelessWidget {
-  final double iconSize = 24.0;
-  final ServiceRequest serviceRequest;
-
-  ServiceRequestItem({required this.serviceRequest});
-
-  @override
-  Widget build(BuildContext context) {
-
-    print('ServiceRequestItem.Widget');
-
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          4.0,
-        ),
-      ),
-      elevation: 4.0,
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-        /*leading: const CircleAvatar(
-          backgroundImage:
-          NetworkImage('https://learncodeonline.in/mascot.png'),
-        ),*/
-        /*leading: Container(
-          padding: EdgeInsets.only(right: 12.0),
-          decoration: new BoxDecoration(
-              border: new Border(
-                  right: new BorderSide(width: 1.0, color: Colors.white24))),
-          child: Icon(Icons.autorenew, color: Colors.white),
-        ),*/
-        title: Text(
-          serviceRequest.customerLast ?? 'No description',
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20.0,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Service Requests'),
+          bottom: TabBar(
+            tabs: const <Widget>[
+              Tab(
+                // icon: Icon(Icons.radio_button_on, color: Colors.white),
+                text: 'Assigned',
+              ),
+              Tab(
+                // icon: Icon(Icons.check_box, color: Colors.white),
+                text: 'Accepted',
+              ),
+              Tab(
+                // icon: Icon(Icons.send, color: Colors.white),
+                text: 'Completed',
+              ),
+            ],
           ),
         ),
-        subtitle: Text(
-          serviceRequest.requestStatus.toString().split('.').last,
-          style: const TextStyle(
-            color: Colors.blueAccent,
-            fontWeight: FontWeight.normal,
-            fontSize: 16.0,
-          ),
+        body: TabBarView(
+          children: [
+            ServiceRequestList(serviceRequest: _srList, status: Status.Accepted),
+            Icon(Icons.directions_transit, size: 350),
+            Icon(Icons.directions_car, size: 350),
+          ],
         ),
-          trailing: Icon(Icons.keyboard_arrow_right, color: Colors.blueAccent, size: 30.0),
-          onTap: () {
-
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ServiceRequestDetails(serviceRequest: serviceRequest)
-                )
-            );
-          }
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.call),
+              label: 'ToDos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.camera),
+              label: 'Camera',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat),
+              label: 'Chats',
+            ),
+          ],
+          //currentIndex: _selectedIndex, //New
+          //onTap: _onItemTapped,         //New
+        ),
+        /*drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: const <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text(
+                  'Drawer Header',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.message),
+                title: Text('Messages'),
+              ),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('Profile'),
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Settings'),
+              ),
+            ],
+          ),
+        ),*/
       ),
     );
   }
 }
-
-class DetailPage extends StatelessWidget {
-
-  final ServiceRequest serviceRequest;
-
-  DetailPage({required this.serviceRequest});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: <Widget>
-        [
-          Container(
-            height: MediaQuery.of(context).size.height * 0.5,
-            padding: EdgeInsets.all(40.0),
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(color: Color.fromRGBO(58, 66, 86, .9)),
-            child: Center(
-              child: Text(serviceRequest.id),
-            ),
-          ),
-          Positioned(
-            left: 8.0,
-            top: 60.0,
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Icon(Icons.arrow_back, color: Colors.blueAccent),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-

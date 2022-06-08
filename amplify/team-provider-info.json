@@ -13,7 +13,8 @@
     },
     "categories": {
       "auth": {
-        "datastorepoc9db82b75": {}
+        "datastorepoc9db82b75": {},
+        "true": {}
       }
     }
   }
