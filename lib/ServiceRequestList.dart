@@ -27,19 +27,7 @@ class ServiceRequestList extends StatelessWidget {
         ? ListView(
         padding: EdgeInsets.all(8),
         children: serviceRequest.map((serviceRequest) => ServiceRequestItem(serviceRequest: serviceRequest)).toList())
-        : Center(child: Text('Tap button below to add a todo!'));
-  }
-
-  Future<List> GetServiceLists() async{
-    try {
-      _serviceRequests = await Amplify.DataStore.query(ServiceRequest.classType);
-      print('@ _configureAmplify : ${_serviceRequests.length}');
-    }
-    on DataStoreException catch (e) {
-      print('Query failed: $e');
-    }
-
-    return _serviceRequests;
+        : Center(child: Text('None!'));
   }
 }
 

@@ -42,7 +42,14 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Details of Service Request"),
+        title: Text(
+            serviceRequest.serviceRequestID.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18.0,
+            )
+        ),
         backgroundColor: Colors.blue,
         leading: IconButton(
           onPressed: () {
@@ -113,40 +120,47 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton(
-                            child: const Text(
-                              'Reject',
-                              textScaleFactor: 1.5,
-                              style: TextStyle(color: Colors.white),
+                          if (serviceRequest.requestStatus == Status.Assigned) ...[
+                            ElevatedButton.icon(
+                              label: Text('Reject'),
+                              onPressed: () {
+                                setState(() {
+                                  rejectServiceRequest(serviceRequest.id);
+                                });
+                              },
+                              icon: Icon(Icons.thumb_down_alt_sharp, size: 12.0,),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+                              ),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                rejectServiceRequest(serviceRequest.id);
-                              });
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(Colors.blue),
-                              padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(5)),
+                            ElevatedButton.icon(
+                              label: Text('Accept'),
+                              onPressed: () {
+                                setState(() {
+                                  acceptServiceRequest(serviceRequest.id);
+                                });
+                              },
+                              icon: Icon(Icons.thumb_up_alt_sharp, size: 12.0,),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                              ),
                             ),
-                          ),
-                          ElevatedButton(
-                            child: const Text(
-                              'Start Inspection',
-                              textScaleFactor: 1.5,
-                              style: TextStyle(color: Colors.white),
+                          ],
+                          if (serviceRequest.requestStatus == Status.Accepted)
+                            ElevatedButton.icon(
+                              label: Text('Start Inspection'),
+                              onPressed: () {
+                                setState(() {
+                                  startInspection(serviceRequest);
+                                });
+                              },
+                              icon: Icon(Icons.flag_sharp, size: 12.0,),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                              ),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                startInspection(serviceRequest);
-                              });
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(Colors.blue),
-                              padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(5)),
-                            ),
-                          ),
-                        ],
-                      )
+                          ],
+                      ),
                     ),
                   ],
                 ),
